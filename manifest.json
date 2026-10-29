@@ -1,7 +1,7 @@
 {
   "id": "cipherfold",
   "name": "Cipherfold",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "minAppVersion": "1.14.5",
   "description": "Encrypted notes and attachments in a dedicated vault, with a native editor and recoverable history.",
   "author": "Cipherfold contributors",

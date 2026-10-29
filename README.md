@@ -2,7 +2,7 @@
 
 Encrypted, append-only notes in a **dedicated desktop Obsidian vault**, using the native Markdown editor, links and search while unlocked. Titles, content and attachments are encrypted on disk; revisions and deletion records are retained.
 
-**Early community release, 0.1.0.** Requires Obsidian 1.14.5 or later on desktop. Uses private Obsidian APIs and must be revalidated after Obsidian upgrades. Mobile is intentionally disabled. No independent security certification is claimed. Start with synthetic notes and keep verified backups.
+**Community review candidate, 0.1.1. Not yet listed in the Community Plugins directory.** Requires Obsidian 1.14.5 or later on desktop. Uses private Obsidian APIs and must be revalidated after Obsidian upgrades. Mobile is intentionally disabled. No independent security certification is claimed. Start with synthetic notes and keep verified backups.
 
 ## Install and create a vault
 
@@ -24,7 +24,7 @@ Encrypted trash and immutable revisions are not a substitute for an independent 
 
 ## Optional synchronization
 
-Local operation needs no account or network. Advanced replication uses an operator-provided HTTPS CouchDB server and a separately installed/configured Self-hosted LiveSync plugin for the full replica. See [SYNC.md](docs/SYNC.md). No server, database or credentials are supplied. Selective replication and password change require enrollment; password change is not available for an unenrolled local-only vault in this release.
+Local operation needs no account or network. Advanced replication uses an operator-provided HTTPS CouchDB server and a separately installed/configured Self-hosted LiveSync plugin for the full replica. See [SYNC.md](docs/SYNC.md). No server, database or credentials are supplied. Local vaults can use **Change access password** without a server. Enrolled replicas require a reachable server and a verified password-generation exchange. Selective replication requires enrollment.
 
 ## Development
 

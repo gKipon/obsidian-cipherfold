@@ -43,7 +43,15 @@ export class PasswordManager{
   change(currentPassword,newPassword){return this.#serial(async()=>{
     const header=parseHeaderJSON(await this.readHeader()),local=await this.io.read();
     const key=await unlockPasswordKey(header,currentPassword,local);
-    const config=await decryptReplicaMessage(header,key,'config',await this.readConfig());
+    const savedConfig=await this.readConfig();
+    // Only an absent enrollment permits a local rotation. A damaged/unreadable
+    // enrollment must fail, never silently bypass remote generation checks.
+    if(savedConfig===null){
+      const next=await makePasswordCredential(header,local,currentPassword,newPassword);
+      await verifyPasswordCredential(header,key,next);await this.io.write(next);
+      await unlockPasswordKey(header,newPassword,await this.io.read());return next.generation;
+    }
+    const config=await decryptReplicaMessage(header,key,'config',savedConfig);
     check(config?.version===1&&['full','selective'].includes(config.mode),'PASSWORD_ENROLLMENT_REQUIRED');
     const transport=this.transportFactory(config.connection);await transport.connect();
     const {id,doc,current}=await this.#remote(header,key,transport);

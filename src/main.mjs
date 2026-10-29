@@ -379,14 +379,16 @@ export default class CipherfoldPlugin extends Plugin {
     this.closeReplica();this.editorBaselines=new WeakMap();this.store.lock();this.updateStatus();return true;
   }
   onunload(){
+    this.ready=false;
     if(!this.store){this.disposed=true;return;}
     // Guard hooks deliberately remain until application reload: restoring raw writes
     // while native views have pending saves could put plaintext onto disk.
     this.epoch++;clearTimeout(this.refreshTimer);
     this.sessionLock?.idle.stop();
     void this.lock().then(locked=>{
-      if(locked){this.disposed=true;this.acceptWrites=false;this.store.lock();}
+      if(locked){this.disposed=true;this.acceptWrites=false;this.store.lock();new Notice('Cipherfold: notes locked. Fully restart Obsidian before re-enabling or updating this plugin.');}
       else new Notice('Cipherfold: unload encountered a save failure. Session kept in memory; do not restart until saved.');
-    });
+    }).catch(()=>new Notice('Cipherfold: unload could not complete. Preserve the session and recover pending edits before restarting.'))
+      .finally(()=>this.sessionLock?.idle.stop());
   }
 }

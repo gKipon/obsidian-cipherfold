@@ -1,4 +1,15 @@
-# Verification record — 0.1.0 release candidate
+# Verification record — 0.1.1 community review candidate
+
+Checked on 2026-10-30 in disposable environments with synthetic data only.
+
+- JavaScript regression suite: 150 passing tests.
+- Obsidian 1.14.5, separate application identity/profile/vault: native editor save, lock, cold restart and unlock preserve exact text.
+- Local password rotation verifies its immutable credential file; the running application accepts the new password after restart.
+- Unload after lock reports the required full restart. Guards intentionally remain; this is disclosed for directory review.
+- Shared synthetic vault disk scan: note marker, fake device token and configured endpoint are absent in plaintext.
+- Official eslint-plugin-obsidianmd 0.4.2 recommended rules were run explicitly on all source .mjs files. No security-critical scanner rule failed. Advisory findings remain; see COMMUNITY-REVIEW.md.
+
+# Previous 0.1.0 baseline
 
 Checked on 2026-10-30 with synthetic data only.
 

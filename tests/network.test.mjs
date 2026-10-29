@@ -7,3 +7,10 @@ test('replica credentials never follow an HTTP redirect',async()=>{
  await new Promise(r=>server.listen(0,'127.0.0.1',r));
  try{await assert.rejects(requestReplica({url:`http://127.0.0.1:${server.address().port}/original`,method:'POST',headers:{Authorization:'Basic synthetic'},body:'{}'}));assert.equal(hits,0);}finally{server.closeAllConnections();await new Promise(r=>server.close(r));}
 });
+
+test('replica timeout aborts a stalled response body',async()=>{
+ const server=http.createServer((_req,res)=>{res.writeHead(200,{'Content-Type':'application/json'});res.write('{');});
+ await new Promise(r=>server.listen(0,'127.0.0.1',r));
+ try{await assert.rejects(requestReplica({url:`http://127.0.0.1:${server.address().port}/slow`,method:'GET'},fetch,40),e=>e.name==='AbortError');}
+ finally{server.closeAllConnections();await new Promise(r=>server.close(r));}
+});

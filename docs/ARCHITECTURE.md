@@ -4,7 +4,7 @@
 
 `resource-cache.mjs` supplies in-memory attachment resources. `session-lock.mjs` persists only lock timeout and a last-open UUID. `secret-storage-guard.mjs` validates the existing OS-encrypted Obsidian secret slot before permitting persistence.
 
-Optional replication is split into pure planning (`selective-policy.mjs`, `replica-model.mjs`), state machine (`replica-engine.mjs`), bounded CouchDB transport (`replica-transport.mjs`), pinned upstream codec (`replica-codec.mjs`) and UI (`replica-runtime.mjs`). Password-generation verification and rotation are in `password-manager.mjs`; UI is in `password-runtime.mjs`.
+Optional replication is split into pure planning (`selective-policy.mjs`, `replica-model.mjs`), state machine (`replica-engine.mjs`), bounded CouchDB transport (`replica-transport.mjs`), pinned upstream codec (`replica-codec.mjs`) and UI (`replica-runtime.mjs`). Password-generation verification and rotation are in `password-manager.mjs`; UI is in `password-runtime.mjs`. Unenrolled vaults rotate locally; enrolled vaults must reconcile the server generation. `http-body.mjs` bounds streamed replica responses to 48 MiB, and `network.mjs` aborts after 90 seconds.
 
 Test layers cover strict schemas, tampering, independent crypto interoperability, Unicode, sizes, attachments, stale writers, lock races, metadata persistence, editor operations, immutable transport read-back, conflicts, password generations and selective-replica budgets. Bridge tests mock private Obsidian interfaces; real application smoke tests remain necessary.
 

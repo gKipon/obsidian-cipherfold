@@ -61,3 +61,25 @@ test('password journal publishes only complete files and rejects conflicting gen
  await io.write(c);assert.deepEqual(await io.read(),c);await io.write(c);files.set(root+'/password-key-incomplete.tmp','torn');assert.deepEqual(await io.read(),c);
  const other=await makePasswordCredential(header,null,old,third);await io.write(other);await assert.rejects(io.read(),e=>e.code==='PASSWORD_LOCAL_CONFLICT');
 });
+
+test('local-only password rotation verifies read-back, preserves data and never contacts a server',async()=>{
+ const {header,key}=await createVault(old),encrypted=await encryptReplicaMessage(header,key,'config',{synthetic:true});let saved=null;
+ const manager=new PasswordManager({io:{read:async()=>saved,write:async v=>{saved=structuredClone(v);}},readHeader:async()=>JSON.stringify(header),readConfig:async()=>null,transportFactory:()=>{assert.fail('local vault attempted network');}});
+ assert.equal(await manager.change(old,next),1);
+ assert.deepEqual(await decryptReplicaMessage(header,await manager.unlock(header,next),'config',encrypted),{synthetic:true});
+ await assert.rejects(manager.unlock(header,old));assert.equal(await manager.change(next,third),2);
+ await manager.unlock(header,third);await unlockPasswordKey(header,old); // Retained header remains a recovery copy.
+});
+test('unreadable or corrupt enrollment never falls back to local password rotation',async()=>{
+ const {header}=await createVault(old);let writes=0;
+ for(const readConfig of [async()=>{throw Error('read failed');},async()=>'',async()=>'invalid']){
+  const manager=new PasswordManager({io:{read:async()=>null,write:async()=>{writes++;}},readHeader:async()=>JSON.stringify(header),readConfig,transportFactory:()=>{assert.fail('invalid enrollment contacted server');}});
+  await assert.rejects(manager.change(old,next));
+ }
+ assert.equal(writes,0);
+});
+test('failed local password commit cannot report success',async()=>{
+ const {header}=await createVault(old);
+ const manager=new PasswordManager({io:{read:async()=>null,write:async()=>{}},readHeader:async()=>JSON.stringify(header),readConfig:async()=>null});
+ await assert.rejects(manager.change(old,next));await manager.unlock(header,old);
+});
