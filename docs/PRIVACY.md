@@ -5,7 +5,7 @@
 - `CipherfoldStore/vault.rvkey`: public format version, random vault UUID, KDF parameters, salt, IV and encrypted data key. No plaintext passphrase.
 - `CipherfoldStore/<object UUID>_<revision UUID>.renc`: authenticated encrypted records. Titles, MIME metadata, timestamps inside records, note content and attachment bytes are encrypted. Outer routing metadata reveals object/revision relationships, kinds, counts and ciphertext lengths; filesystem timestamps and traffic patterns also remain observable.
 - Plugin directory: encrypted attachment catalog (`attachment-catalog.rvcat`), encrypted replica config/state and password credentials. `session-state.json` contains idle timeout and last-open object UUID, not its title or content. Enrollment kits contain the public header and encrypted credentials/configuration; protect them like a backup.
-- Obsidian OS-encrypted SecretStorage may persist through the normal encrypted application slot. Other local metadata/workspace configuration is held in memory. An optional LiveSync `data.json` is explicitly allowed to persist; its settings and credential protection are controlled by LiveSync, not by Cipherfold. Review those settings separately.
+- Obsidian OS-encrypted SecretStorage may persist through the normal encrypted application slot. The enabled community-plugin list may persist only as a bounded array of unique, currently installed plugin IDs, so disabling the plugin survives restart. Other local metadata/workspace configuration is held in memory. An optional LiveSync `data.json` is explicitly allowed to persist; its settings and credential protection are controlled by LiveSync, not by Cipherfold. Review those settings separately.
 
 ## Threat model
 

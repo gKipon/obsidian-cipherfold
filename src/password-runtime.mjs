@@ -28,7 +28,7 @@ export function installPassword(plugin,{Modal,Notice,requestUrl,codecFactory}){
           status.textContent=`Password change verified (generation ${generation}). Unlock with the new password. Enrolled replicas must sync other devices.`;
           new Notice('Cipherfold: access password changed.');
         }catch(error){
-          status.textContent=error.code==='PASSWORD_UPDATED_REOPEN'?'A newer password was received from the server. Retry with the current password.':'Unable to confirm password change. Check connectivity and the current password. After interruption, unlock with the old password and sync to receive the server-confirmed change. If already received, use the new password.';
+          status.textContent=error.code==='PASSWORD_UPDATED_REOPEN'?'A newer password was received from the server. Retry with the current password.':'Unable to verify the change. Keep both passwords. Try the new password if it was saved; otherwise use the current password. Enrolled replicas must reconnect and sync before retrying.';
           button.disabled=false;inputs.forEach(i=>{i.disabled=false;});
         }finally{oldPassword='';newPassword='';busy=false;}
       };

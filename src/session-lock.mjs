@@ -34,6 +34,7 @@ export async function installSessionLock(plugin,{Modal,Notice}){
   let settings={version:1,autoLockMinutes:DEFAULT_MINUTES,lastObjectId:null};
   try{if(await plugin.raw.exists(path))settings=sessionSettings(JSON.parse(await plugin.raw.read(path)));}
   catch{new Notice('Cipherfold: lock settings unavailable. Using five minutes.');}
+  if(plugin.disposed||plugin.unloading)return null;
   let writes=Promise.resolve(),disposed=false;
   const persist=()=>{
     const text=JSON.stringify(sessionSettings(settings));

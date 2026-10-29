@@ -5,7 +5,7 @@ This is an independent, MIT-licensed community codebase maintained in this repos
 ## Submission metadata
 
 - Repository: https://github.com/gKipon/obsidian-cipherfold
-- Release/tag: `0.1.1` (no `v` prefix).
+- Release/tag: `0.1.2` (no `v` prefix).
 - Minimum application version: 1.14.5; desktop only.
 - License: MIT. Funding URL omitted.
 - Install assets: `main.js`, `manifest.json`, `styles.css`; `SHA256SUMS` is an additional integrity file.
@@ -13,7 +13,7 @@ This is an independent, MIT-licensed community codebase maintained in this repos
 
 ## Reviewer attention
 
-Cipherfold uses private adapter, metadata cache, editor and workspace hooks to expose encrypted notes through the native editor. It refuses ordinary vault content before installing those hooks. Use a disposable, dedicated vault and synthetic notes for review. File Recovery is disabled because it writes plaintext. Configuration changes are held in RAM except explicitly allowed encrypted secrets and optional LiveSync state.
+Cipherfold uses private adapter, metadata cache, editor and workspace hooks to expose encrypted notes through the native editor. It refuses ordinary vault content before installing those hooks. Use a disposable, dedicated vault and synthetic notes for review. File Recovery is disabled because it writes plaintext. Configuration changes are held in RAM except validated installed plugin IDs, explicitly allowed encrypted secrets and optional LiveSync state.
 
 Unloading requires saving, locking and a full application restart. Persistence guards intentionally survive unload: restoring raw writes while delayed native saves exist could leak plaintext. Hot reload is rejected. This lifecycle constraint is visible in README/PRIVACY and the unload notice; it requires explicit reviewer consideration, not an assumption of guideline compliance.
 

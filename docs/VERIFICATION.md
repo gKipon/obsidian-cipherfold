@@ -1,9 +1,11 @@
-# Verification record — 0.1.1 community review candidate
+# Verification record — 0.1.2 community review candidate
 
 Checked on 2026-10-30 in disposable environments with synthetic data only.
 
-- JavaScript regression suite: 150 passing tests.
-- Obsidian 1.14.5, separate application identity/profile/vault: native editor save, lock, cold restart and unlock preserve exact text.
+- JavaScript regression suite: 156 passing tests.
+- Six additional tests cover interrupted startup, late lock setup, validated plugin-ID persistence and rejection of arbitrary config plaintext.
+- Obsidian 1.14.5, separate application identity/profile/vault: the 0.1.1 baseline verified native editor save, lock, cold restart and exact text recovery.
+- Version 0.1.2: disabling through application settings persists after cold restart; re-enabling and unlocking restores the same exact encrypted note, then locks successfully.
 - Local password rotation verifies its immutable credential file; the running application accepts the new password after restart.
 - Unload after lock reports the required full restart. Guards intentionally remain; this is disclosed for directory review.
 - Shared synthetic vault disk scan: note marker, fake device token and configured endpoint are absent in plaintext.

@@ -6,6 +6,12 @@ function clock(){
  const idle=new IdleLock({now:()=>wall,monotonic:()=>mono,onExpire:()=>expired++,schedule:(fn,ms)=>{const id=++next;timers.set(id,{fn,ms});return id;},cancel:id=>timers.delete(id)});
  return {idle,timers,get expired(){return expired;},advance(ms){wall+=ms;mono+=ms;},sleep(ms){wall+=ms;},adjust(ms){wall+=ms;}};
 }
+test('unload while reading preferences creates no late timers or listeners',async()=>{
+ let release;const gate=new Promise(r=>release=r);
+ const plugin={app:{vault:{configDir:'.test-config'}},raw:{exists:()=>gate},registerDomEvent(){assert.fail('late listener');},register(){assert.fail('late cleanup');}};
+ const pending=installSessionLock(plugin,{Modal:class{},Notice:class{}});plugin.unloading=true;release(false);
+ assert.equal(await pending,null);
+});
 test('default locks once after five minutes, activity extends it, stop cancels it',()=>{
  const c=clock();c.idle.start();c.advance(299000);assert.equal(c.idle.check(),false);
  c.idle.activity();c.advance(299000);assert.equal(c.idle.check(),false);c.advance(1000);

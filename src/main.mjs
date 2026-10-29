@@ -9,6 +9,7 @@ import {installEditorRevisions} from './editor-revisions.mjs';
 import {installReplica} from './replica-runtime.mjs';
 import {codecFactory} from './replica-codec.mjs';
 import {isEncryptedSecretSlot} from './secret-storage-guard.mjs';
+import {isPluginEnablement} from './config-guard.mjs';
 import {installSessionLock} from './session-lock.mjs';
 
 const native = p => typeof p==='string' && (p===VIRTUAL_ROOT || p.startsWith(VIRTUAL_ROOT+'/'));
@@ -50,9 +51,10 @@ class UnlockModal extends Modal {
 export default class CipherfoldPlugin extends Plugin {
   onload(){
     this.disposed=false;
-    this.app.workspace.onLayoutReady(()=>{if(!this.disposed)void this.start().catch(()=>new Notice('Cipherfold: startup failed. Check that this is a dedicated vault and restart Obsidian.'));});
+    this.app.workspace.onLayoutReady(()=>{if(!this.disposed)void this.start().catch(()=>{if(!this.disposed&&!this.unloading)new Notice('Cipherfold: startup failed. Check that this is a dedicated vault and restart Obsidian.');});});
   }
   async start(){
+    if(this.disposed||this.unloading)return;
     if(this.app[Symbol.for('cipherfold:guard-owner')])throw Error('RESTART_REQUIRED');
     this.disposed=false;this.ready=false;this.acceptWrites=false;this.lockPromise=null;this.voiceLifecycleVersion=1;
     this.queue=Promise.resolve();this.resources=new ResourceCache(async path=>{const f=this.store.stat(path);if(!f?.binary)denied();const bytes=new Uint8Array(await this.store.readBinary(path));try{return {url:`data:${f.mime};base64,${bytesToBase64(bytes)}`,bytes:bytes.byteLength};}finally{bytes.fill(0);}});this.projected=new Map();this.volatileFolders=new Set();
@@ -64,6 +66,7 @@ export default class CipherfoldPlugin extends Plugin {
     this.adapter=vault.adapter;this.raw={};
     for(const name of methods) if(typeof this.adapter[name]==='function')this.raw[name]=this.adapter[name].bind(this.adapter);
     await assertDedicatedVault(this.raw,vault.configDir);
+    if(this.disposed||this.unloading)return;
     // The catalog is encrypted with the vault key and deliberately stays outside
     // the LiveSync namespace. It is disposable; no password/key is persisted.
     const catalogPath=vault.configDir+'/plugins/cipherfold/attachment-catalog.rvcat';
@@ -74,13 +77,21 @@ export default class CipherfoldPlugin extends Plugin {
     }});
     // Empty isolated vault: disable all metadata persistence before virtual discovery.
     if(cache.preloadPromise) await cache.preloadPromise;
+    if(this.disposed||this.unloading)return;
+    const previousTransactionSave=cache.transactionSave;
     cache.transactionSave=null;
     await cache.clear();
+    if(this.disposed||this.unloading){
+      // No virtual files or persistence guards have been installed yet.
+      if(cache.transactionSave===null)cache.transactionSave=previousTransactionSave;
+      return;
+    }
     this.app[Symbol.for('cipherfold:guard-owner')]=this;
     this.installGuards();
     installNoteWorkflow(this,Notice);
     installEditorRevisions(this);
     await installReplica(this,{Modal,Notice,requestUrl,codecFactory});
+    if(this.disposed||this.unloading)return;
     const openFile=WorkspaceLeaf.prototype.openFile,p=this;
     WorkspaceLeaf.prototype.openFile=async function(file,...args){
       if(native(file?.path)){
@@ -100,6 +111,7 @@ export default class CipherfoldPlugin extends Plugin {
     if(recovery?.enabled){
       if(typeof recovery.disable!=='function')throw Error('Unsupported File Recovery lifecycle');
       await recovery.disable(false);
+      if(this.disposed||this.unloading)return;
     }
     if(recovery) recovery.enable=async()=>{new Notice('Cipherfold: File Recovery is disabled because it persists plaintext copies.');return false;};
     this.addCommand({id:'create',name:'Create encrypted vault',callback:()=>setupModal(this,{Modal,Notice}).open()});
@@ -115,6 +127,7 @@ export default class CipherfoldPlugin extends Plugin {
     };
     for(const event of ['create','modify','delete'])this.registerEvent(vault.on(event,changed));
     this.sessionLock=await installSessionLock(this,{Modal,Notice});
+    if(this.disposed||this.unloading){this.sessionLock?.idle.stop();return;}
     this.ready=true;
     this.app.workspace.onLayoutReady(()=>new Notice('Cipherfold: use the lock icon or command palette to unlock notes.'));
   }
@@ -209,6 +222,10 @@ export default class CipherfoldPlugin extends Plugin {
     const write=async(path,data,options={},binary=false)=>{
       if(!native(path)){
         if(config(path)){
+          if(path===p.app.vault.configDir+'/community-plugins.json'){
+            if(binary||!isPluginEnablement(p.app,data))denied();
+            return r.write(path,data,options);
+          }
           if(durableConfig(path)){
             if(binary)denied();
             // Only LiveSync's connection settings persist. Never native properties/layout.
@@ -379,8 +396,8 @@ export default class CipherfoldPlugin extends Plugin {
     this.closeReplica();this.editorBaselines=new WeakMap();this.store.lock();this.updateStatus();return true;
   }
   onunload(){
-    this.ready=false;
-    if(!this.store){this.disposed=true;return;}
+    this.unloading=true;this.ready=false;
+    if(!this.store||this.app[Symbol.for('cipherfold:guard-owner')]!==this){this.disposed=true;this.store?.lock();return;}
     // Guard hooks deliberately remain until application reload: restoring raw writes
     // while native views have pending saves could put plaintext onto disk.
     this.epoch++;clearTimeout(this.refreshTimer);

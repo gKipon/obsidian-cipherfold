@@ -2,7 +2,7 @@
 
 Encrypted, append-only notes in a **dedicated desktop Obsidian vault**, using the native Markdown editor, links and search while unlocked. Titles, content and attachments are encrypted on disk; revisions and deletion records are retained.
 
-**Community review candidate, 0.1.1. Not yet listed in the Community Plugins directory.** Requires Obsidian 1.14.5 or later on desktop. Uses private Obsidian APIs and must be revalidated after Obsidian upgrades. Mobile is intentionally disabled. No independent security certification is claimed. Start with synthetic notes and keep verified backups.
+**Community review candidate, 0.1.2. Not yet listed in the Community Plugins directory.** Requires Obsidian 1.14.5 or later on desktop. Uses private Obsidian APIs and must be revalidated after Obsidian upgrades. Mobile is intentionally disabled. No independent security certification is claimed. Start with synthetic notes and keep verified backups.
 
 ## Install and create a vault
 
@@ -12,7 +12,7 @@ Encrypted, append-only notes in a **dedicated desktop Obsidian vault**, using th
 4. Create a note using the normal Obsidian command; it appears under `Native`. Use **Create notebook** for folders. Save and use **Lock encrypted notes** before closing.
 5. Default inactivity lock is five minutes. Configure it through **Automatic lock: change timeout**. Switching windows alone does not lock notes immediately.
 
-File Recovery is disabled in this dedicated vault because it persists plaintext. Metadata, workspace state and virtual Markdown files are intercepted into memory. Configuration changes made while the plugin is active may not persist, except specifically allowed encrypted secrets and synchronization state. Other plugins can access plaintext while unlocked. Read the complete [privacy boundaries](docs/PRIVACY.md).
+File Recovery is disabled in this dedicated vault because it persists plaintext. Metadata, workspace state and virtual Markdown files are intercepted into memory. Configuration changes made while the plugin is active may not persist, except the validated enabled-plugin ID list, specifically allowed encrypted secrets and synchronization state. Other plugins can access plaintext while unlocked. Read the complete [privacy boundaries](docs/PRIVACY.md).
 
 **Disable/update:** finish saving, lock, disable or replace the plugin, then fully quit and restart Obsidian. Guards intentionally remain until restart; hot reload is refused. Never disable it in order to bypass a failed save.
 

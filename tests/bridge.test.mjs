@@ -15,6 +15,21 @@ source=source.replace("import {Plugin,Modal,Notice,TFile,WorkspaceLeaf,requestUr
 source=source.replace(/'\.\/([^']+\.mjs)'/g,(_,name)=>JSON.stringify(new URL('../src/'+name,import.meta.url).href)).replace(/import \{codecFactory\} from [^;]+;/, 'const codecFactory=()=>{throw Error("No network in bridge test");};');
 const {default:NativePlugin}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 const password='synthetic-native-bridge-password';
+for(const phase of ['disk','preload','cache-clear'])test(`unload during ${phase} startup cannot install hooks or reactivate the plugin`,async()=>{
+ let release,entered;const gate=new Promise(r=>release=r),reached=new Promise(r=>entered=r);
+ const originalWrite=async()=>{},originalSave=()=>{};
+ const adapter={write:originalWrite,exists:async()=>false,list:async()=>{if(phase==='disk'){entered();await gate;}return {files:[],folders:[]};}};
+ const cache={workQueue:{promise:Promise.resolve()},transactionSave:originalSave,
+  get preloadPromise(){if(phase==='preload'){entered();return gate;}},
+  async clear(){if(phase==='cache-clear'){entered();await gate;}}};
+ const app={vault:{adapter,configDir:'.test-config',onChange(){}},metadataCache:cache};
+ const plugin=new NativePlugin();plugin.app=app;
+ const starting=plugin.start();await reached;plugin.onunload();release();await starting;
+ assert.equal(plugin.disposed,true);assert.equal(plugin.ready,false);
+ assert.equal(adapter.write,originalWrite);assert.equal(cache.transactionSave,originalSave);
+ assert.equal(app[Symbol.for('cipherfold:guard-owner')],undefined);
+ assert(!plugin.store?.isUnlocked);
+});
 async function fixture(t,{recoveryEnabled=false}={}){
  const root=await fs.mkdtemp(path.join(os.tmpdir(),'cipherfold-native-bridge-'));t.after(()=>fs.rm(root,{recursive:true,force:true}));
  const physical=p=>path.join(root,p),map=new Map(),diskWrites=[];
@@ -58,6 +73,17 @@ test('native folder toolbar root fallback, context child and cleanup preserve pr
  plugin.acceptWrites=false;assert.throws(()=>app.fileManager.createNewFolder(),e=>e.code==='LOCKED');
  for(const fn of plugin.cleanup)fn();
  await assert.rejects(app.fileManager.createNewFolder());
+});
+test('plugin disable persists installed IDs without allowing arbitrary config plaintext',async t=>{
+ const {app,a,plugin}=await fixture(t);app.plugins.manifests={cipherfold:{},'dictation-bridge':{}};
+ const config=app.vault.configDir+'/community-plugins.json';
+ await a.write(config,'["dictation-bridge"]');assert.equal(await plugin.raw.read(config),'["dictation-bridge"]');
+ await assert.rejects(a.write(config,'["SYNTHETIC_PRIVATE_TITLE"]'));
+ await assert.rejects(a.write(config,'{"title":"SYNTHETIC_PRIVATE_TITLE"}'));
+ await assert.rejects(a.writeBinary(config,new TextEncoder().encode('["cipherfold"]').buffer));
+ assert.equal(await plugin.raw.read(config),'["dictation-bridge"]');
+ await a.write(app.vault.configDir+'/workspace.json','SYNTHETIC_PRIVATE_TITLE');
+ assert.equal(await plugin.raw.exists(app.vault.configDir+'/workspace.json'),false);
 });
 test('native adapter preserves UTF8 binary metadata reads and never creates plaintext files',async t=>{
  const {a,root,map}=await fixture(t);await a.write('Native/Русский.md','# Заголовок\nNATIVE_SECRET_MARKER');

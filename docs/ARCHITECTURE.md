@@ -2,7 +2,7 @@
 
 `src/main.mjs` coordinates the native Obsidian adapter/cache bridge, editor saves, resources and lock lifecycle. `onboarding.mjs` checks raw disk before hooks and creates a new dedicated encrypted vault. `virtual-store.mjs` projects `Native/` into memory; `store.mjs` owns immutable records and conflict/history validation. `crypto.mjs` is the sole WebCrypto format implementation. `editor-revisions.mjs` and `note-workflow.mjs` prevent stale saves, unsafe rename and destructive deletion.
 
-`resource-cache.mjs` supplies in-memory attachment resources. `session-lock.mjs` persists only lock timeout and a last-open UUID. `secret-storage-guard.mjs` validates the existing OS-encrypted Obsidian secret slot before permitting persistence.
+`resource-cache.mjs` supplies in-memory attachment resources. `session-lock.mjs` persists only lock timeout and a last-open UUID. `config-guard.mjs` validates the only newly durable configuration list: installed plugin IDs. Startup checks unloading/disposal after asynchronous preparation and avoids late resources. `secret-storage-guard.mjs` validates the existing OS-encrypted Obsidian secret slot before permitting persistence.
 
 Optional replication is split into pure planning (`selective-policy.mjs`, `replica-model.mjs`), state machine (`replica-engine.mjs`), bounded CouchDB transport (`replica-transport.mjs`), pinned upstream codec (`replica-codec.mjs`) and UI (`replica-runtime.mjs`). Password-generation verification and rotation are in `password-manager.mjs`; UI is in `password-runtime.mjs`. Unenrolled vaults rotate locally; enrolled vaults must reconcile the server generation. `http-body.mjs` bounds streamed replica responses to 48 MiB, and `network.mjs` aborts after 90 seconds.
 
