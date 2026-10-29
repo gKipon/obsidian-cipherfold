@@ -1,0 +1,10 @@
+.cipherfold-native-info { color: var(--text-muted); }
+.cipherfold-native-password { width: 100%; margin: 1em 0; }
+.cipherfold-native-progress { width: 100%; }
+/* Cosmetic only: encrypted physical objects remain on disk and in LiveSync. */
+.nav-folder:has(> .nav-folder-title[data-path="CipherfoldStore"]) { display: none; }
+.cipherfold-replica-modal textarea { width: 100%; min-height: 8em; margin: .4em 0 1em; }
+.cipherfold-replica-modal input { width: 100%; margin: .3em 0 .7em; }
+.cipherfold-replica-modal label { display: block; margin-top: .7em; }
+.cipherfold-replica-modal span { overflow-wrap: anywhere; }
+.cipherfold-replica-modal button { margin: .3em 0; }

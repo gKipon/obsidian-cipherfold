@@ -1,0 +1,17 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const required=['README.md','AGENTS.md','LICENSE','SECURITY.md','CONTRIBUTING.md','CHANGELOG.md','THIRD-PARTY-NOTICES.md','package-lock.json','docs/PRIVACY.md','docs/ARCHITECTURE.md','docs/VERIFICATION.md'];
+for(const file of required)await fs.access(path.join(root,file));
+const manifest=JSON.parse(await fs.readFile(path.join(root,'manifest.json'),'utf8'));
+const pkg=JSON.parse(await fs.readFile(path.join(root,'package.json'),'utf8'));
+const versions=JSON.parse(await fs.readFile(path.join(root,'versions.json'),'utf8'));
+if(manifest.version!==pkg.version||versions[pkg.version]!==manifest.minAppVersion||manifest.isDesktopOnly!==true)throw Error('Release metadata mismatch');
+const assets=(await fs.readdir(path.join(root,'dist'))).sort();
+if(JSON.stringify(assets)!==JSON.stringify(['main.js','manifest.json','styles.css']))throw Error('Unexpected release asset');
+if(await fs.readFile(path.join(root,'manifest.json'),'utf8')!==await fs.readFile(path.join(root,'dist/manifest.json'),'utf8'))throw Error('Stale manifest');
+const bundle=await fs.readFile(path.join(root,'dist/main.js'),'utf8');
+if(/(?:\/Users\/|\/home\/|[A-Z]:\\\\Users\\\\|\/private\/var\/|\/node_modules\/\.\.\/)/.test(bundle))throw Error('Machine-specific build path');
+if(!bundle.startsWith('/*!\n# Third-party notices'))throw Error('Missing embedded notices');
+console.log('Release metadata, documentation and three-file asset list verified');

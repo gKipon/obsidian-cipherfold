@@ -1,0 +1,15 @@
+# Optional synchronization (advanced)
+
+Local creation/editing/lock/restore work without network. Replication is optional, and this release's new public namespace has not been accepted against a production CouchDB deployment. Use a disposable server/database and synthetic notes before adopting it.
+
+A full replica uses separately installed Self-hosted LiveSync, configured by its operator. Required settings checked by Cipherfold: `syncOnlyRegEx = ^CipherfoldStore/`, `syncIgnoreRegEx = ^Native/`, `syncInternalFiles = false`, `usePluginSync = false`, `usePluginSyncV2 = false`. Do not enable internal/plugin sync. Cipherfold additionally limits the LiveSync adapter to the physical ciphertext namespace.
+
+The selective-replica codec requires HTTPS, encryption and encrypted internal metadata enabled, E2EE algorithm `v2`, path obfuscation enabled, ID derivation version 1 with a 64-hex-character derivation key, compression and Eden disabled. `src/replica-transport.mjs:connectionFromSettings` defines the exact fields. Credentials must belong to the user's dedicated database, never to a shared unrelated deployment. The supported upstream codec is pinned in package-lock.json; compatibility with every LiveSync release is not implied.
+
+On a full replica, **Prepare selective replicas** verifies and publishes the encrypted server catalog, then writes `device-enrollment.rvsetup` in the Cipherfold plugin directory. Keep the vault unlocked until read-back completes. The kit includes a public key header, encrypted selective config and optional authenticated password credential. It must never be committed or posted in an issue.
+
+There is no consumer import wizard for selective kits in 0.1.0. Selective enrollment is an advanced developer interface: the kit's header maps to `CipherfoldStore/vault.rvkey`, encrypted `config` maps to `.obsidian/plugins/cipherfold/replica-config.json`, and an optional credential must be validated and installed through the `passwordIO` format. Never perform this manually on an existing vault. Use a new disposable vault and review the engine/password tests before implementing a provisioning tool. A selective replica must not also load LiveSync.
+
+Selective mode retains downloaded records, pins requested older notes, enforces a download budget and fetches archive titles from encrypted catalog state. Obsidian search sees downloaded notes only. No pruning, destructive rebuild or automatic resubmission of ambiguous state is provided. Password change requires a verified enrolled connection and server acknowledgement; it is unavailable in local-only mode.
+
+Cipherfold replica requests use Fetch with redirects forbidden and cookies omitted. Configure CouchDB/proxy CORS for your Obsidian client origin and explicitly allow Authorization and Content-Type headers plus GET/POST/PUT as required. Use an exact final HTTPS base URL that does not redirect. The separately installed LiveSync transport has its own policy.

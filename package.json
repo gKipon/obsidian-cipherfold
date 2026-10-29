@@ -1,0 +1,26 @@
+{
+  "name": "cipherfold",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "check": "npm test && npm run build && node tools/check-release.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "obsidian": "1.14.4"
+  },
+  "dependencies": {
+    "@vrtmrz/livesync-commonlib": "0.2.0",
+    "octagonal-wheels": "0.1.55"
+  },
+  "overrides": {
+    "uuid": "11.1.1"
+  }
+}
