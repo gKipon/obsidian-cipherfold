@@ -23,4 +23,8 @@ No network is required for local use. Optional sync needs the operator's HTTPS C
 
 The official recommended rules were run against `src/**/*.mjs` explicitly; the directory scanner documentation currently excludes `.mjs` by default. No critical no-eval, implied-eval, unsafe-HTML, forbidden-element or lookbehind finding occurred. Advisory findings include global timers/Fetch/WebCrypto in Node-testable modules, intentional empty catches for privacy/error cleanup, and sentence-case false positives for product names, acronyms and literal URLs. The `.obsidian` literal is a reserved virtual path name, not an on-disk configuration directory lookup; disk access uses `vault.configDir`. Private wrapper closures retain an owner reference deliberately.
 
-Approval is determined by the Obsidian team. This document is a review packet, not evidence that the listing has been submitted or accepted.
+## Directory result — 2026-10-30
+
+The [listing](https://community.obsidian.md/plugins/cipherfold) is public and its Add to Obsidian link is active. The automated review of version 0.1.2 completed with the displayed result **Satisfactory**. Dependency scanning found no vulnerable dependencies, and the directory reproduced main.js byte-for-byte from source. Recommendations remain for artifact attestations and the optional SHA256SUMS asset, which Obsidian does not download. The scanner also reports vault enumeration and a CSS :has performance warning; these findings do not represent a cryptographic assessment.
+
+This records the directory's automated checks. It does not claim independent manual security certification or additional device/provider testing.

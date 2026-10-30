@@ -2,12 +2,12 @@
 
 Encrypted, append-only notes in a **dedicated desktop Obsidian vault**, using the native Markdown editor, links and search while unlocked. Titles, content and attachments are encrypted on disk; revisions and deletion records are retained.
 
-**Community review candidate, 0.1.2. Not yet listed in the Community Plugins directory.** Requires Obsidian 1.14.5 or later on desktop. Uses private Obsidian APIs and must be revalidated after Obsidian upgrades. Mobile is intentionally disabled. No independent security certification is claimed. Start with synthetic notes and keep verified backups.
+**Community release 0.1.2.** [View in the Community Plugins directory](https://community.obsidian.md/plugins/cipherfold). Requires Obsidian 1.14.5 or later on desktop. Uses private Obsidian APIs and must be revalidated after Obsidian upgrades. Mobile is intentionally disabled. No independent security certification is claimed. Start with synthetic notes and keep verified backups.
 
 ## Install and create a vault
 
 1. Create a new, empty Obsidian vault. Do not install into your existing notes vault. Ordinary root files/folders make startup fail before adapter/cache hooks are installed.
-2. From this repository's GitHub release, download `main.js`, `manifest.json` and `styles.css`; verify `SHA256SUMS`. Copy the three files into `<new-vault>/.obsidian/plugins/cipherfold/`.
+2. In that dedicated vault, install Cipherfold from the [Community Plugins directory](https://community.obsidian.md/plugins/cipherfold). For manual installation, from this repository's GitHub release download `main.js`, `manifest.json` and `styles.css`; verify `SHA256SUMS`. Copy the three files into `<new-vault>/.obsidian/plugins/cipherfold/`.
 3. Enable Community plugins, then Cipherfold. Click the lock icon and choose a unique passphrase of at least 12 characters. There is no recovery service.
 4. Create a note using the normal Obsidian command; it appears under `Native`. Use **Create notebook** for folders. Save and use **Lock encrypted notes** before closing.
 5. Default inactivity lock is five minutes. Configure it through **Automatic lock: change timeout**. Switching windows alone does not lock notes immediately.
